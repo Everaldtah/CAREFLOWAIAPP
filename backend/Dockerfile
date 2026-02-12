@@ -114,8 +114,8 @@ RUN poetry lock --no-update || true
 RUN poetry config virtualenvs.create true \
     && poetry config virtualenvs.in-project true
 
-# Install dependencies (with dev and test)
-RUN poetry install --no-root --no-interaction --with dev,test
+# Install dependencies (with dev)
+RUN poetry install --no-root --no-interaction --with dev
 
 # Copy application code
 COPY . .
