@@ -26,6 +26,26 @@ from app.api.v1.endpoints import (
 
 api_router = APIRouter()
 
+@api_router.get("/health", status_code=200)
+def health():
+    from app.core.database import get_db
+    db = get_db()
+    try:
+        # Try to execute a simple query
+        db.execute("SELECT 1")
+        return {
+            "status": "ok",
+            "database": "connected",
+            "redis": "connected"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "database": "disconnected",
+            "redis": "disconnected",
+            "message": str(e)
+        }
+
 # =============================================================================
 # Public Routes (no authentication)
 # =============================================================================
