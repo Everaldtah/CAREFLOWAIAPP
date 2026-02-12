@@ -1,15 +1,14 @@
 # =============================================================================
-# CareFlow AI - Backend Dockerfile
+# CareFlow AI - Backend Dockerfile (Simplified)
 # =============================================================================
 
-FROM python:3.11-slim as base
+FROM python:3.11-slim
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VERSION=1.7.1
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -21,104 +20,24 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install "poetry==$POETRY_VERSION"
+# Install Poetry globally (not in virtualenv)
+RUN pip install --no-cache-dir poetry==1.7.1
 
 # Set work directory
 WORKDIR /app
 
-# =============================================================================
-# Development Stage
-# =============================================================================
-FROM base as development
+# Copy dependency files
+COPY pyproject.toml poetry.lock* ./
 
-# Copy poetry files
-COPY pyproject.toml ./
-
-# Generate poetry.lock if it doesn't exist
-RUN poetry lock --no-update || true
-
-# Configure poetry to install to .venv
-RUN poetry config virtualenvs.create true \
-    && poetry config virtualenvs.in-project true
-
-# Install dependencies (including dev)
-RUN poetry install --no-root --no-interaction --with dev
+# Install dependencies into system Python
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-root
 
 # Copy application code
 COPY . .
-
-# Pre-create directories
-RUN mkdir -p logs uploads
 
 # Expose port
 EXPOSE 8000
 
-# Default command
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-
-# =============================================================================
-# Production Stage
-# =============================================================================
-FROM base as production
-
-# Copy poetry files
-COPY pyproject.toml ./
-
-# Generate poetry.lock if it doesn't exist
-RUN poetry lock --no-update || true
-
-# Configure poetry
-RUN poetry config virtualenvs.create true \
-    && poetry config virtualenvs.in-project true
-
-# Install dependencies (without dev)
-RUN poetry install --no-root --no-interaction --only main
-
-# Copy application code
-COPY . .
-
-# Create non-root user
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app
-
-# Create directories
-RUN mkdir -p logs uploads && \
-    chown -R appuser:appuser logs uploads
-
-# Switch to non-root user
-USER appuser
-
-# Expose port
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Run with gunicorn
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# =============================================================================
-# Tests Stage
-# =============================================================================
-FROM base as test
-
-# Copy poetry files
-COPY pyproject.toml ./
-
-# Generate poetry.lock if it doesn't exist
-RUN poetry lock --no-update || true
-
-# Configure poetry
-RUN poetry config virtualenvs.create true \
-    && poetry config virtualenvs.in-project true
-
-# Install dependencies (with dev)
-RUN poetry install --no-root --no-interaction --with dev
-
-# Copy application code
-COPY . .
-
-# Run tests
-CMD ["pytest", "-v", "--cov=app", "--cov-report=html"]
+# Start FastAPI using Railway port
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
