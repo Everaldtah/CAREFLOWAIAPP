@@ -47,7 +47,7 @@ services:
       - key: APP_ENV
         value: production
     domains:
-      - api.yourdomain.com
+      - api.careflowai.veraldlabs.co.uk
 
   # Frontend
   - type: web
@@ -57,8 +57,8 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://api.yourdomain.com
+        value: https://api.careflowai.veraldlabs.co.uk
       - key: NEXT_PUBLIC_APP_URL
-        value: https://yourdomain.com
+        value: https://careflowai.veraldlabs.co.uk
     domains:
-      - yourdomain.com
+      - careflowai.veraldlabs.co.uk
