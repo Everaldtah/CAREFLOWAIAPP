@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(docker-compose:*)",
+      "Bash(openssl:*)",
+      "Bash(docker:*)",
+      "Bash(powershell:*)",
+      "Bash(ssh:*)"
+    ]
+  }
+}

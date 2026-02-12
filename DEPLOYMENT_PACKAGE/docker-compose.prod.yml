@@ -1,0 +1,135 @@
+# =============================================================================
+# CareFlow AI - Production Docker Compose
+# =============================================================================
+#
+# This file is used for production deployment on your VPS.
+# It builds production-ready containers without development tools.
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # PostgreSQL Database with pgvector (Production)
+  # =============================================================================
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: careflow-postgres-prod
+    environment:
+      POSTGRES_DB: careflow_prod
+      POSTGRES_USER: careflow
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U careflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - careflow-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # Redis (Production)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: careflow-redis-prod
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - careflow-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # Backend API (Production)
+  # =============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: careflow-backend-prod
+    environment:
+      APP_ENV: production
+      APP_URL: ${APP_URL}
+      API_URL: ${API_URL}
+      DATABASE_URL: postgresql://careflow:${DB_PASSWORD}@postgres:5432/careflow_prod
+      REDIS_URL: redis://redis:6379/0
+      REDIS_CACHE_URL: redis://redis:6379/1
+      REDIS_AGENT_STATE_URL: redis://redis:6379/2
+      SECRET_KEY: ${SECRET_KEY}
+      SECRET_KEY_REFRESH: ${SECRET_KEY_REFRESH}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_ENVIRONMENT: production
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - backend_logs:/app/logs
+      - backend_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - careflow-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # Frontend (Production)
+  # =============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: careflow-frontend-prod
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: ${APP_URL}
+      NEXT_PUBLIC_API_URL: ${API_URL}
+      NEXT_PUBLIC_ENABLE_ANALYTICS: "true"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - careflow-network
+    restart: unless-stopped
+
+volumes:
+  postgres_prod_data:
+    driver: local
+  redis_prod_data:
+    driver: local
+  backend_logs:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  careflow-network:
+    driver: bridge

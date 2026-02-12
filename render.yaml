@@ -1,0 +1,64 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: careflow-postgres
+    env: docker
+    disk:
+      name: data
+      mountPath: /var/lib/postgresql/data
+    envVars:
+      - key: POSTGRES_DB
+        value: careflow_prod
+      - key: POSTGRES_USER
+        value: careflow
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+
+  # Redis
+  - type: pserv
+    name: careflow-redis
+    env: docker
+    envVars:
+      - key: REDIS_MAXMEMORY
+        value: 2gb
+
+  # Backend API
+  - type: pserv
+    name: careflow-backend
+    env: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: careflow-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: careflow-redis
+          property: url
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: APP_ENV
+        value: production
+    domains:
+      - api.yourdomain.com
+
+  # Frontend
+  - type: web
+    name: careflow-frontend
+    env: docker
+    dockerContext: ./frontend
+    dockerfilePath: ./frontend/Dockerfile
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.yourdomain.com
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://yourdomain.com
+    domains:
+      - yourdomain.com

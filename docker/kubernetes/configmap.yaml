@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: careflow-config
+  namespace: careflow-ai
+data:
+  APP_ENV: "production"
+  APP_NAME: "CareFlow AI"
+  API_V1_PREFIX: "/api/v1"
+  DATABASE_POOL_SIZE: "20"
+  JWT_ALGORITHM: "HS256"
+  JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  JWT_REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  LLM_MODEL: "gpt-4-turbo-preview"
+  LLM_TEMPERATURE: "0.7"
+  LLM_MAX_TOKENS: "2000"
+  REDIS_PORT: "6379"
+  SMTP_PORT: "587"
+  SMTP_USE_TLS: "true"
+  VECTOR_DIMENSIONS: "1536"
+  VECTOR_SIMILARITY_THRESHOLD: "0.75"
