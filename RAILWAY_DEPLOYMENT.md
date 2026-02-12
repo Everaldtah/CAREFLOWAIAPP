@@ -1,302 +1,192 @@
 # CareFlow AI - Railway Deployment Guide
 
-## Deploy to careflowai.veraldlabs.co.uk
+## 🚀 Complete Railway Deployment Guide
 
-This guide will help you deploy CareFlow AI to Railway.cloud and connect it to your subdomain.
+This guide covers deployment of CareFlow AI to Railway.cloud with custom domain `careflowai.veraldlabs.co.uk`.
 
 ---
 
 ## Prerequisites
 
-1. Railway Account (free tier available): https://railway.app/
-2. GitHub Account (for code repository)
-3. CareFlow AI source code
-4. OpenAI API Key (for AI features)
+- Railway account with project created
+- Services created: backend, frontend, PostgreSQL, Redis
+- GitHub repository: Everaldtah/CAREFLOWAIAPP
 
 ---
 
-## Step 1: Push Code to GitHub
+## 📋 Project Structure
 
-```bash
-cd C:/Users/evera/careflow-ai
-git init
-git add .
-git commit -m "Initial commit for Railway deployment"
-# Create a new repository on GitHub first, then:
-git remote add origin https://github.com/YOUR_USERNAME/careflow-ai.git
-git push -u origin main
-```
+The Railway project has been created with:
+- **Backend Service** (Python/FastAPI)
+- **Frontend Service** (Next.js)
+- **PostgreSQL Database**
+- **Redis Cache**
 
 ---
 
-## Step 2: Deploy to Railway
+## 🔧 Backend Environment Variables
 
-### Option A: Deploy via Railway CLI (Recommended)
+Add these variables to the **Backend Service**:
 
-1. Install Railway CLI:
-```bash
-# Windows (using PowerShell)
-npm install -g @railway/cli
+| Variable | Value | Source |
+|-----------|--------|--------|
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` | Auto-linked from careflow-postgres |
+| `REDIS_URL` | `${{Redis.REDIS_URL}}` | Auto-linked from careflow-redis |
+| `REDIS_CACHE_URL` | `${{Redis.REDIS_URL}}` | Auto-linked from careflow-redis |
+| `REDIS_AGENT_STATE_URL` | `${{Redis.REDIS_URL}}` | Auto-linked from careflow-redis |
+| `APP_ENV` | `production` | Manual |
+| `APP_URL` | `https://careflowai.veraldlabs.co.uk` | Manual |
+| `API_URL` | `https://careflow-backend.onrender.com` | Manual |
+| `SECRET_KEY` | `[Click Generate in Railway]` | Generate in Railway |
+| `ENCRYPTION_KEY` | `[Click Generate in Railway]` | Generate in Railway |
+| `OPENAI_API_KEY` | Your OpenAI API key | Manual |
 
-# Or download from: https://github.com/railwayapp/cli
-```
-
-2. Login to Railway:
-```bash
-railway login
-```
-
-3. Initialize project:
-```bash
-cd C:/Users/evera/careflow-ai
-railway init
-```
-
-4. Add PostgreSQL Database:
-```bash
-railway add postgresql
-```
-
-5. Add Redis:
-```bash
-railway add redis
-```
-
-6. Deploy Backend:
-```bash
-cd backend
-railway up --service=backend
-```
-
-7. Deploy Frontend:
-```bash
-cd ../frontend
-railway up --service=frontend
-```
-
-### Option B: Deploy via Railway Dashboard
-
-1. Go to https://railway.app/
-2. Click "New Project" → "Deploy from GitHub repo"
-3. Select your careflow-ai repository
-4. Railway will auto-detect services
+### Backend URLs:
+- **Railway URL**: Provided after deployment
+- **Custom Domain**: `api.careflowai.veraldlabs.co.uk`
 
 ---
 
-## Step 3: Configure Environment Variables
+## 🔧 Frontend Environment Variables
 
-### Backend Environment Variables
+Add these variables to the **Frontend Service**:
 
-Go to your backend service in Railway and add these variables:
+| Variable | Value |
+|-----------|--------|
+| `NODE_ENV` | `production` |
+| `NEXT_PUBLIC_APP_URL` | `https://careflowai.veraldlabs.co.uk` |
+| `NEXT_PUBLIC_API_URL` | `https://api.careflowai.veraldlabs.co.uk` |
 
-```bash
-# Database (Railway provides DATABASE_URL automatically)
-DATABASE_URL=${{Postgres.DATABASE_URL}}
-
-# Redis (Railway provides REDIS_URL automatically)
-REDIS_URL=${{Redis.REDIS_URL}}
-REDIS_CACHE_URL=${{Redis.REDIS_URL}}
-REDIS_AGENT_STATE_URL=${{Redis.REDIS_URL}}
-
-# Application
-APP_ENV=production
-APP_URL=https://careflowai.veraldlabs.co.uk
-API_URL=https://your-backend-url.railway.app
-
-# Security (Generate these with: python -c "import secrets; print(secrets.token_urlsafe(32))")
-SECRET_KEY=your-secret-key-here
-SECRET_KEY_REFRESH=your-refresh-key-here
-ENCRYPTION_KEY=your-encryption-key-hex-here
-
-# AI/LLM
-OPENAI_API_KEY=sk-your-openai-api-key-here
-
-# Email (optional)
-SMTP_HOST=smtp.resend.com
-SMTP_PORT=587
-SMTP_USER=your-smtp-user
-SMTP_PASSWORD=your-smtp-password
-SMTP_FROM=noreply@veraldlabs.co.uk
-
-# Logging
-LOG_LEVEL=INFO
-SENTRY_ENVIRONMENT=production
-```
-
-### Frontend Environment Variables
-
-```bash
-NODE_ENV=production
-NEXT_PUBLIC_APP_URL=https://careflowai.veraldlabs.co.uk
-NEXT_PUBLIC_API_URL=https://your-backend-url.railway.app
-NEXT_PUBLIC_ENABLE_ANALYTICS=false
-```
+### Frontend URLs:
+- **Railway URL**: Provided after deployment
+- **Custom Domain**: `careflowai.veraldlabs.co.uk`
 
 ---
 
-## Step 4: Get Railway URLs
+## 🌐 Custom Domains
 
-After deployment, Railway provides:
-- Backend URL: `https://your-backend-name.up.railway.app`
-- Frontend URL: `https://your-frontend-name.up.railway.app`
+### Backend Domain:
+1. Go to **Backend Service** → **Settings** → **Domains**
+2. Click **Add Domain**
+3. Enter: `api.careflowai.veraldlabs.co.uk`
 
-Note these URLs for the next step.
-
----
-
-## Step 5: Configure Custom Domain
-
-### Add Domain in Railway
-
-1. Go to your service settings in Railway dashboard
-2. Click "Domains" → "Generate Domain"
-3. For backend: Click "Add Custom Domain" → `api.careflowai.veraldlabs.co.uk`
-4. For frontend: Click "Add Custom Domain" → `careflowai.veraldlabs.co.uk`
-
-### Configure DNS
-
-Go to your VeraldLabs DNS management (where veraldlabs.co.uk is registered) and add:
-
-| Type  | Name                      | Value                          | TTL  |
-|-------|---------------------------|--------------------------------|------|
-| CNAME | careflowai                | [your-frontend-name].up.railway.app | 3600 |
-| CNAME | api.careflowai            | [your-backend-name].up.railway.app | 3600 |
-
-Or if using A records:
-
-| Type  | Name        | Value                 | TTL  |
-|-------|-------------|-----------------------|------|
-| CNAME | careflowai  | cname.railway.app     | 3600 |
-| CNAME | api         | cname.railway.app     | 3600 |
+### Frontend Domain:
+1. Go to **Frontend Service** → **Settings** → **Domains**
+2. Click **Add Domain**
+3. Enter: `careflowai.veraldlabs.co.uk`
 
 ---
 
-## Step 6: Run Database Migrations
+## 🗄️ Database Migrations
 
-After the PostgreSQL database is created in Railway:
+Once services are running with environment variables configured:
 
+### Option 1: Via Railway CLI (if authentication works)
 ```bash
-# Get the database connection string from Railway dashboard
-# Then run Alembic migrations
-
-cd backend
-
-# Set DATABASE_URL from Railway
-export DATABASE_URL="postgresql://user:password@host:port/dbname"
-
-# Run migrations
+railway run backend
 alembic upgrade head
 ```
 
-Or use Railway CLI to run in the deployed environment:
-
-```bash
-railway run bash
-alembic upgrade head
-exit
-```
+### Option 2: Via Railway Dashboard (Recommended)
+1. Go to **Backend Service**
+2. Click **"Deployments"** tab
+3. Click **"New Deployment"** → **"Variables"**
+4. Add variable: `RUN_MIGRATIONS` = `alembic upgrade head`
+5. Click **"Save & Deploy"**
 
 ---
 
-## Step 7: Verify Deployment
+## ✅ Verification Steps
 
-### Test Backend Health
-
+### 1. Check Backend Health
 ```bash
 curl https://api.careflowai.veraldlabs.co.uk/health
 # Should return: {"status":"healthy"}
 ```
 
-### Test API Docs
+### 2. Check Frontend
+```bash
+curl https://careflowai.veraldlabs.co.uk
+# Should return CareFlow AI HTML
+```
 
-Visit: `https://api.careflowai.veraldlabs.co.uk/docs`
-
-### Test Frontend
-
-Visit: `https://careflowai.veraldlabs.co.uk`
-
----
-
-## Railway Service URLs Summary
-
-| Service | Railway URL | Custom Domain |
-|---------|-------------|---------------|
-| Backend API | `https://[backend].up.railway.app` | `https://api.careflowai.veraldlabs.co.uk` |
-| Frontend | `https://[frontend].up.railway.app` | `https://careflowai.veraldlabs.co.uk` |
+### 3. Check API Documentation
+Visit: https://api.careflowai.veraldlabs.co.uk/docs
 
 ---
 
-## Troubleshooting
+## 🔧 Service Configuration
 
-### Database Connection Issues
+### Backend Service:
+- **Name**: careflow-backend
+- **Root Directory**: backend
+- **Dockerfile**: backend/Dockerfile
+- **Start Command**: Python uvicorn server
+- **Port**: 8000 (auto-assigned)
 
-1. Check DATABASE_URL is set correctly
-2. Verify PostgreSQL service is running in Railway
-3. Run `alembic upgrade head` to create tables
-
-### Frontend Build Fails
-
-1. Check NODE_ENV is set to "production"
-2. Verify NEXT_PUBLIC_API_URL points to correct backend URL
-3. Check Railway build logs
-
-### Custom Domain Not Working
-
-1. Wait 10-30 minutes for DNS propagation
-2. Verify DNS records match Railway's requirements
-3. Check domain configuration in Railway dashboard
-
-### OpenAI API Not Working
-
-1. Verify OPENAI_API_KEY is set correctly
-2. Check API key has available credits
-3. Check Railway logs for errors
+### Frontend Service:
+- **Name**: frontend
+- **Root Directory**: frontend
+- **Dockerfile**: frontend/Dockerfile
+- **Start Command**: npm start
+- **Port**: 3000 (auto-assigned)
 
 ---
 
-## Cost Estimate (Railway Free Tier)
+## 💡 Important Notes
 
-- **Free Tier**: $5/month credit
-- **PostgreSQL**: Included in free tier
-- **Redis**: ~$0 (free tier)
-- **Backend**: ~$0-5/month (depending on usage)
-- **Frontend**: ~$0-5/month (depending on usage)
+1. **DNS Must Be Propagated**
+   - CNAME records for `careflowai.veraldlabs.co.uk` and `api.careflowai.veraldlabs.co.uk` must be fully propagated
+   - Check propagation at: https://dnschecker.org/
+   - Usually takes 10-30 minutes, up to 48 hours
 
----
+2. **PostgreSQL & Redis**
+   - Already added to your Railway project
+   - Will be auto-linked to backend via environment variables
 
-## Alternative: Render Deployment
+3. **OpenAI API Key**
+   - Required for AI features (triage, scribe, etc.)
+   - Add your key to `OPENAI_API_KEY` variable
 
-If Railway doesn't work, use Render:
-
-1. Go to https://render.com/
-2. Connect GitHub repository
-3. Create services:
-   - PostgreSQL Database
-   - Redis (through Upstash or Render)
-   - Web Service (Backend)
-   - Static Site (Frontend)
+4. **Security Keys**
+   - `SECRET_KEY` and `ENCRYPTION_KEY` are generated automatically by Railway
+   - Click "Generate" button in Railway UI
 
 ---
 
-## Alternative: Fly.io Deployment
+## 🚨 Troubleshooting
 
-1. Install `flyctl` CLI
-2. `fly launch` in backend directory
-3. `fly postgres create` for database
-4. `fly deploy` to deploy
+### Backend Issues:
+```bash
+# Check logs in Railway dashboard
+railway logs backend
+
+# Restart service
+railway restart backend
+```
+
+### Frontend Issues:
+```bash
+# Check logs
+railway logs frontend
+
+# Restart service
+railway restart frontend
+```
+
+### Domain Not Working:
+1. Verify DNS records are correct
+2. Check domain configuration in Railway
+3. Wait for full DNS propagation
 
 ---
 
-## Next Steps
+## 📞 Support
 
-After successful deployment:
-
-1. Create admin user via the frontend
-2. Configure OpenAI API key for AI features
-3. Set up email for notifications (optional)
-4. Monitor logs in Railway dashboard
-5. Set up monitoring (optional with Sentry)
+- **Railway Documentation**: https://docs.railway.app/
+- **Railway Status**: https://status.railway.app/
+- **GitHub Issues**: Check repository for updates
 
 ---
 
-Need help? Check Railway docs: https://docs.railway.app/
+**Deployment Status**: ✅ Ready for configuration
