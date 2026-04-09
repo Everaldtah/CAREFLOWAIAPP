@@ -1,0 +1,37 @@
+[
+  {
+    "timestamp": "2026-04-09T15:00:29.554185",
+    "issues_found": 4,
+    "fixes_generated": 1,
+    "issues": [
+      {
+        "file": "DEPLOYMENT_PACKAGE/run_deployment.py",
+        "line": 7,
+        "type": "hardcoded_secret",
+        "severity": "HIGH",
+        "fix": "Move to environment variables"
+      },
+      {
+        "file": "DEPLOYMENT_PACKAGE/run_deployment.py",
+        "line": 22,
+        "type": "catch_all_except",
+        "severity": "MEDIUM",
+        "fix": "Catch specific exceptions"
+      },
+      {
+        "file": "DEPLOYMENT_PACKAGE/ssh_deploy.py",
+        "line": 20,
+        "type": "hardcoded_secret",
+        "severity": "HIGH",
+        "fix": "Move to environment variables"
+      },
+      {
+        "file": "DEPLOYMENT_PACKAGE/full_deploy.py",
+        "line": 14,
+        "type": "hardcoded_secret",
+        "severity": "HIGH",
+        "fix": "Move to environment variables"
+      }
+    ]
+  }
+]

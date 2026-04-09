@@ -19,7 +19,7 @@ def run_cmd(ssh, command, print_output=True):
             if print_output:
                 try:
                     print(line.rstrip())
-                except:
+except Exception:
                     pass
     exit_status = stdout.channel.recv_exit_status()
     return exit_status, output
