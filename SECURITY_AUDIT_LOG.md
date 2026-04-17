@@ -1,14 +1,14 @@
 # Security Audit Report
 
 **Repository:** CAREFLOWAIAPP  
-**Analysis Date:** 2026-04-09 15:00:29 UTC  
+**Analysis Date:** 2026-04-17 06:01:14 UTC  
 **Bot Version:** Hermes Security Bot v1.0
 
 ## Summary
 
-- **Total Issues Found:** 4
-- **Automatic Fixes Generated:** 1
-- **Fixes Applied in this Run:** 1
+- **Total Issues Found:** 3
+- **Automatic Fixes Generated:** 0
+- **Fixes Applied in this Run:** 0
 
 ## Analysis Details
 
@@ -25,15 +25,12 @@ The following security patterns were checked:
 | Severity | Issue Type | File | Line | Match |
 |----------|-----------|------|------|-------|
 | HIGH | hardcoded_secret | `DEPLOYMENT_PACKAGE/run_deployment.py` | 7 | `PASSWORD = 'j2nzgPFUido5D'` |
-| MEDIUM | catch_all_except | `DEPLOYMENT_PACKAGE/run_deployment.py` | 22 | `except:` |
 | HIGH | hardcoded_secret | `DEPLOYMENT_PACKAGE/ssh_deploy.py` | 20 | `PASSWORD = "j2nzgPFUido5D"` |
 | HIGH | hardcoded_secret | `DEPLOYMENT_PACKAGE/full_deploy.py` | 14 | `PASSWORD = 'j2nzgPFUido5D'` |
 
 ### Fixes Generated
 
-| File | Line | Severity | Original | Replacement |
-|------|------|----------|----------|-------------|
-| `DEPLOYMENT_PACKAGE/run_deployment.py` | 22 | MEDIUM | `except:` | `except Exception:` |
+*No automatic fixes were generated for this analysis.*
 
 ## Audit History
 
@@ -41,4 +38,4 @@ This file is automatically updated by the Hermes Security Bot.
 **Do not manually edit** - bot updates will overwrite changes.
 
 ---
-*Last updated: 2026-04-09 15:00:29 UTC*
+*Last updated: 2026-04-17 06:01:14 UTC*

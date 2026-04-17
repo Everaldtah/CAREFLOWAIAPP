@@ -33,5 +33,33 @@
         "fix": "Move to environment variables"
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-17T06:01:14.075140",
+    "issues_found": 3,
+    "fixes_generated": 0,
+    "issues": [
+      {
+        "file": "DEPLOYMENT_PACKAGE/run_deployment.py",
+        "line": 7,
+        "type": "hardcoded_secret",
+        "severity": "HIGH",
+        "fix": "Move to environment variables"
+      },
+      {
+        "file": "DEPLOYMENT_PACKAGE/ssh_deploy.py",
+        "line": 20,
+        "type": "hardcoded_secret",
+        "severity": "HIGH",
+        "fix": "Move to environment variables"
+      },
+      {
+        "file": "DEPLOYMENT_PACKAGE/full_deploy.py",
+        "line": 14,
+        "type": "hardcoded_secret",
+        "severity": "HIGH",
+        "fix": "Move to environment variables"
+      }
+    ]
   }
 ]
